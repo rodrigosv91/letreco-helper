@@ -3,17 +3,27 @@
       <div class="mt-5">
         <div class="mb-4">
 
-          <div class="d-flex justify-content-center mb-5">           
-            <input v-for="item in letras" :key="item.index"
+          <div class="d-flex justify-content-center mb-4">           
+            <input v-for="item in letras_input" :key="item.index"
               type="text"  maxlength="1" 
               class="letter-wrapper rounded d-flex justify-content-center align-items-center mr-2"
-              v-model="letras[item.index].value"
+              v-model="letras_input[item.index].value"
               @keypress="mudaLetra($event, item.index)"
-              v-bind:class="[letras[item.index].state]"
+              v-bind:class="[letras_input[item.index].state]"
               @click="toggleClassInput(item.index)"
             >                        
           </div>
-    
+
+          <div class="d-flex justify-content-center mb-4">
+              <button class="mr-2"
+                @click="resetar()" >
+                <span>Resetar</span>
+              </button>
+              <button
+              @click="procurar()"
+              ><span>Procurar</span></button>
+          </div>
+
           <div class="px-lg-5 px-2">
             <div  v-for="linha in listaDeLetrasTeclado" :key="linha.id_linha"
               class="d-flex justify-content-center mb-2"
@@ -46,28 +56,26 @@ export default {
   name: 'App',
   data (){
     return{
-
       word_size: 5,
-      letras:  [],    // array criado dinamicamente
-
+      letras_input:  [],    // array criado dinamicamente
       listaDePalavras: [],
       listaDePalavrasEncontradas: [],
-      //listaDeLetras: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']     
-      
-      listaDeLetras: ['Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M'],    
-    
+
+      //listaDeLetras: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],     
+      //listaDeLetras: ['Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M'],    
+      /*
       listaDeLetras2: [{value:'Q', state:'none'},{value:'W', state:'none'},{value:'E', state:'none'},{value:'R', state:'none'},{value:'T', state:'none'},{value:'Y', state:'none'},{value:'U', state:'none'},{value:'I', state:'none'},{value:'O', state:'none'},{value:'P', state:'none'},
         {value:'A', state:'none'},{value:'S', state:'none'},{value:'D', state:'none'},{value:'F', state:'none'},{value:'G', state:'none'},{value:'H', state:'none'},{value:'J', state:'none'},{value:'K', state:'none'},{value:'L', state:'none'},
         {value:'Z', state:'none'},{value:'X', state:'none'},{value:'C', state:'none'},{value:'V', state:'none'},{value:'B', state:'none'},{value:'N', state:'none'},{value:'M', state:'none'}] ,
-
-      listaDeLetrasTeclado: []
-
-      /*[
-        'QWERTYUIOP',
-        'ASDFGHJKL',
-        'ZXCVBNM',
-      ].map(str => str.split(''))
       */
+      alfabeto: 'QWERTYUIOPASDFGHJKLZXCVBNM'.split(''),
+      listaDeLetras2: [],
+      listaDeLetrasTeclado: [],  // array 'listaDeLetras' adaptado para formato de teclado
+    
+      //['QWERTYUIOP','ASDFGHJKL','ZXCVBNM',].map(str => str.split(''))
+
+      letras_input_estado_inicial:[],
+      listaDeLetras_estado_inicial: []
     }
   },
   created() {
@@ -77,34 +85,43 @@ export default {
        }).then(this.setWordList),
        
       this.cria_lista_de_inputs(),    // cria array que gerara input para entrada de letras 
+      this.cria_lista_de_letras(),    // cria array de letras com 'state' e 'index'
       this.cria_lista_de_letras_teclado()  // cria array que gerara teclado apartir de letras
   },
   methods:{
     setWordList(wordList){
       this.listaDePalavras = wordList;
     },   
-
     cria_lista_de_inputs(){
-        var array_letras = []; 
+        var array_letras_input = []; 
         for(let i = 0; i < this.word_size; i++){
-          array_letras.push( {'index': i, 'value': "", 'state': "none"});          
+          array_letras_input.push( {'index': i, 'value': "", 'state': "none"});          
         }
-        this.letras = array_letras;
+        this.letras_input = array_letras_input;
+        return array_letras_input;
+    },
+    cria_lista_de_letras(){
+      var array_letras = []; 
+      for(let i = 0; i < this.alfabeto.length; i++){
+          array_letras.push( {'index': i, 'value': this.alfabeto[i], 'state': "none"});          
+      }
+      this.listaDeLetras2 = array_letras;
+      return array_letras;
     },
     cria_lista_de_letras_teclado(){
       var linha1 = []; 
       var linha2 = []; 
       var linha3 = []; 
 
-      for(let i = 0; i < this.listaDeLetras.length; i++){
+      for(let i = 0; i < this.listaDeLetras2.length; i++){
           if(i<10){
-            linha1.push( {'index': i, 'value': this.listaDeLetras[i], 'state': "wrong"});   
+            linha1.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "wrong"});   
           }else
           if(i>=10 && i<19 ){
-            linha2.push( {'index': i, 'value': this.listaDeLetras[i], 'state': "none"});   
+            linha2.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "none"});   
           }else
           if(i>=19){
-            linha3.push( {'index': i, 'value': this.listaDeLetras[i], 'state': "none"});   
+            linha3.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "none"});   
           }      
       }
       this.listaDeLetrasTeclado.push(linha1);
@@ -124,43 +141,46 @@ export default {
     },
     // muda estado de letra em input
     toggleClassInput(n){
-      if(this.letras[n].state == "right"){
-        this.letras[n].state = "displaced";
-      }else if(this.letras[n].state == "displaced"){
-        this.letras[n].state = "right";
+      if(this.letras_input[n].state == "right"){
+        this.letras_input[n].state = "displaced";
+      }else if(this.letras_input[n].state == "displaced"){
+        this.letras_input[n].state = "right";
       }else {
-        this.letras[n].state = "right";
+        this.letras_input[n].state = "right";
       }
-      //this.letras[n].state = this.letras[n].state == "right" ? "displaced" : "right";
+      //this.letras_input[n].state = this.letras_input[n].state == "right" ? "displaced" : "right";
     },
 
     mudaLetra(e, n){     
       if(e.key == "Enter"){ 
-
+        /*
         this.listaDePalavrasEncontradas = [];
 
         var newArray = [];
-        var existeLetraErrada = false;
         var existeLetraBusca = false;
+        var existeLetraErrada = false;
 
-        let letrasErradas = this.listaDeLetras2.filter(function checkWrong(x) {
-          existeLetraErrada = true;
-          return x.state == 'wrong';
-        });
-
-        for (var i = 0; i < this.letras.length; ++i) {
-          if(this.letras[i].value != ''){
+        //verifica se existe letra a ser buscada em input
+        for (var i = 0; i < this.letras_input.length; ++i) {
+          if(this.letras_input[i].value != ''){
             existeLetraBusca = true;
             break;
           }
         }
 
+        //verifica se existe alguma letra errada a ser filtrada das palavras
+        let letrasErradas = this.listaDeLetras2.filter(function checkWrong(obj) {
+          return obj.state == 'wrong';
+        });
+        existeLetraErrada = letrasErradas.length > 0 ? true : false;    //teste
+  
+        //carrega lista de palavras se existe alguma letra a ser buscada (input) ou filtrada (letra errada)
         if(existeLetraBusca || existeLetraErrada){
           this.listaDePalavrasEncontradas = this.listaDePalavras;
         }
         
         //verifica se a letra existe na posição "N" da palavra 
-        this.letras.forEach( item => {
+        this.letras_input.forEach( item => {
           if(item.value != '' && item.state == 'right'){
             newArray = [];
             this.listaDePalavrasEncontradas.forEach(palavraTestada => {
@@ -172,12 +192,12 @@ export default {
         });    
         
         //verifica se existe a letra na palavra        
-        this.letras.forEach( item => {
+        this.letras_input.forEach( item => {
           if(item.value != '' && item.state == 'displaced'){
           newArray = [];
-          this.listaDePalavrasEncontradas.forEach(p => {
-              if(p.includes(item.value.toUpperCase()) && p[item.index] != item.value.toUpperCase() ){
-                newArray.push(p);
+          this.listaDePalavrasEncontradas.forEach(palavra => {
+              if(palavra.includes(item.value.toUpperCase()) && palavra[item.index] != item.value.toUpperCase() ){
+                newArray.push(palavra);
               }
           });
           this.listaDePalavrasEncontradas = newArray;
@@ -188,25 +208,101 @@ export default {
         if(existeLetraErrada){
           letrasErradas.forEach(l => {
             newArray = []; 
-            this.listaDePalavrasEncontradas.forEach(p => {
-              if(!p.includes(l.value)){
-                newArray.push(p);
+            this.listaDePalavrasEncontradas.forEach(palavra => {
+              if(!palavra.includes(l.value)){
+                newArray.push(palavra);
               }
             });
             this.listaDePalavrasEncontradas = newArray;
           });      
         }
-        
-      }
+        */
+        this.procurar();
+      } 
+
       //muda valor da letra em Data
       let ltr = e.key;
-      if (ltr.length === 1 && this.listaDeLetras.includes(ltr.toUpperCase()) ) {
-        this.letras[n].value = ltr;
+
+      function exists(arr, search) {
+          return arr.some(palavra => palavra.includes(search)); // metodo "some" consegue verificar em array multidimensional
+      }                                                         // https://stackoverflow.com/questions/52103644/includes-in-multidimensional-array
+      if (ltr.length === 1 && exists(this.alfabeto, ltr.toUpperCase() ) ) {  
+        this.letras_input[n].value = ltr;
       }else {
         e.preventDefault();
       }
     },
+ 
+    procurar(){
+      this.listaDePalavrasEncontradas = [];
 
+      var newArray = [];
+      var existeLetraBusca = false;
+      var existeLetraErrada = false;
+
+      //verifica se existe letra a ser buscada em input
+      for (var i = 0; i < this.letras_input.length; ++i) {
+        if(this.letras_input[i].value != ''){
+          existeLetraBusca = true;
+          break;
+        }
+      }
+
+      //verifica se existe alguma letra errada a ser filtrada das palavras
+      let letrasErradas = this.listaDeLetras2.filter(function checkWrong(obj) {
+        return obj.state == 'wrong';
+      });
+      existeLetraErrada = letrasErradas.length > 0 ? true : false;
+
+      //carrega lista de palavras se existe alguma letra a ser buscada (input) ou filtrada (letra errada)
+      if(existeLetraBusca || existeLetraErrada){
+        this.listaDePalavrasEncontradas = this.listaDePalavras;
+      }
+      
+      //verifica se a letra existe na posição "N" da palavra 
+      this.letras_input.forEach( item => {
+        if(item.value != '' && item.state == 'right'){
+          newArray = [];
+          this.listaDePalavrasEncontradas.forEach(palavraTestada => {
+              if(palavraTestada[item.index] == item.value.toUpperCase())
+                newArray.push(palavraTestada);
+          });
+          this.listaDePalavrasEncontradas = newArray;
+        }
+      });    
+      
+      //verifica se existe a letra na palavra        
+      this.letras_input.forEach( item => {
+        if(item.value != '' && item.state == 'displaced'){
+        newArray = [];
+        this.listaDePalavrasEncontradas.forEach(palavra => {
+            if(palavra.includes(item.value.toUpperCase()) && palavra[item.index] != item.value.toUpperCase() ){
+              newArray.push(palavra);
+            }
+        });
+        this.listaDePalavrasEncontradas = newArray;
+        }
+      });
+
+      //exclue da lista palavras que contem alguma das letras excluidas (wrong)        
+      if(existeLetraErrada){
+        letrasErradas.forEach(l => {
+          newArray = []; 
+          this.listaDePalavrasEncontradas.forEach(palavra => {
+            if(!palavra.includes(l.value)){
+              newArray.push(palavra);
+            }
+          });
+          this.listaDePalavrasEncontradas = newArray;
+        });      
+      }       
+    },
+
+    resetar(){
+      this.letras_input = this.cria_lista_de_inputs();
+      this.listaDeLetras2 = this.cria_lista_de_letras();
+      this.listaDePalavrasEncontradas = [];
+    }
   }
 }
 </script>
