@@ -8,20 +8,24 @@
               type="text"  maxlength="1" 
               class="letter-wrapper rounded d-flex justify-content-center align-items-center mr-2"
               v-model="letras_input[item.index].value"
-              @keypress="mudaLetra($event, item.index)"
+              @keypress="mudarLetra($event, item.index)"
               v-bind:class="[letras_input[item.index].state]"
               @click="toggleClassInput(item.index)"
+              
             >                        
           </div>
 
           <div class="d-flex justify-content-center mb-4">
-              <button class="mr-2"
+              <button 
+                class="mr-2 rounded "
                 @click="resetar()" >
                 <span>Resetar</span>
               </button>
               <button
-              @click="procurar()"
-              ><span>Procurar</span></button>
+                class="mr-2 rounded "
+                @click="procurar()"
+                ><span>Procurar</span>
+              </button>
           </div>
 
           <div class="px-lg-5 px-2">
@@ -43,8 +47,38 @@
       </div>
 
       <div class="mt-5">
-        <div class="d-flex justify-content-center" id="foundWords">        
-          {{ listaDePalavrasEncontradas }}
+        <div class="found-words-box d-flex justify-content-center overflow-auto " >    
+
+          <!--
+          <div v-for="palavra in listaDePalavrasEncontradas" :key="palavra.id"> 
+            <div class="word mr-2">
+                {{ palavra }} <br>
+            </div> 
+          </div>
+
+          <div v-if="showLess">
+            <div v-for="palavra in listaDePalavrasEncontradas.slice(0, 15)" :key="palavra.id">{{ palavra }} <br></div>
+          </div> 
+          <div v-else> 
+            <div v-for="palavra in listaDePalavrasEncontradas" :key="palavra.id">{{ palavra }} <br></div>
+          </div> 
+          <button @click="showLess = false">More</button>
+
+
+          <div v-if="listaDePalavrasEncontradas.length > 0 "> 
+            <p class="text-center font-weight-normal">
+
+              {{ listaDePalavrasEncontradas.join(', ') }} 
+            </p>            
+          </div> 
+          -->
+          <div class="container">
+            <div class="row" v-for="i in Math.ceil(listaDePalavrasEncontradas.length / 5) " :key="i.id">
+              <p  class="col " v-for="palavra in listaDePalavrasEncontradas.slice((i - 1 ) * 5, i * 5)" :key="palavra.id">
+                {{palavra}}
+              </p>           
+            </div>
+          </div>
         </div>
       </div>
 
@@ -113,15 +147,15 @@ export default {
       var linha2 = []; 
       var linha3 = []; 
 
-      for(let i = 0; i < this.listaDeLetras2.length; i++){
+      for(let i = 0; i < this.alfabeto.length; i++){
           if(i<10){
-            linha1.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "wrong"});   
+            linha1.push( {'index': i, 'value': this.alfabeto[i], 'state': "wrong"});   
           }else
           if(i>=10 && i<19 ){
-            linha2.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "none"});   
+            linha2.push( {'index': i, 'value': this.alfabeto[i], 'state': "none"});   
           }else
           if(i>=19){
-            linha3.push( {'index': i, 'value': this.listaDeLetras2[i].value, 'state': "none"});   
+            linha3.push( {'index': i, 'value': this.alfabeto[i], 'state': "none"});   
           }      
       }
       this.listaDeLetrasTeclado.push(linha1);
@@ -148,10 +182,11 @@ export default {
       }else {
         this.letras_input[n].state = "right";
       }
+      //alert(n)
       //this.letras_input[n].state = this.letras_input[n].state == "right" ? "displaced" : "right";
     },
 
-    mudaLetra(e, n){     
+    mudarLetra(e, n){     
       if(e.key == "Enter"){ 
         /*
         this.listaDePalavrasEncontradas = [];
@@ -347,4 +382,14 @@ input {
   width: 8%;
   height: 40px;
 }
+.found-words-box{
+  max-width: 450px;
+  max-height: 250px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.col{
+  max-width: 20%;
+}
+
 </style>
