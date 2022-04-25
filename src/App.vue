@@ -3,15 +3,15 @@
       <div class="mt-5">
         <div class="mb-4">
 
-          <div class="d-flex justify-content-center mb-4">           
+          <div class="d-flex justify-content-center mb-4 ml-1">           
             <input v-for="item in letras_input" :key="item.index"
               type="text"  maxlength="1" 
               class="letter-wrapper rounded d-flex justify-content-center align-items-center mr-2"
               v-model="letras_input[item.index].value"
               @keypress="mudarLetra($event, item.index)"
               v-bind:class="[letras_input[item.index].state]"
-              @click="toggleClassInput(item.index)"
-              
+              @dblclick="toggleClassInput(item.index)"
+              @keydown="toggleClassThroughArrowKey($event, item.index)"
             >                        
           </div>
 
@@ -28,14 +28,17 @@
               </button>
           </div>
 
+          <div class="divider"/>
+
           <div class="px-lg-5 px-2">
+            <h5 class="text-center m-4">Letras Inexistentes</h5>
             <div  v-for="linha in listaDeLetrasTeclado" :key="linha.id_linha"
               class="d-flex justify-content-center mb-2"
             >
               <button v-for="tecla in linha" :key="tecla.index"
                   class="keyboard-button rounded me-2 letter-button mr-2"
                   type="button" 
-                  v-bind:class="[listaDeLetras2[tecla.index].state]"
+                  v-bind:class="[listaDeLetras[tecla.index].state]"
                   @click="toggleClassKeyboardButton(tecla.index)"
               >
                 <span>{{ tecla.value }}</span>
@@ -46,8 +49,13 @@
         </div> 
       </div>
 
-      <div class="mt-5">
-        <div class="found-words-box d-flex justify-content-center overflow-auto " >    
+      <!--
+      <div v-if="listaDePalavrasEncontradas.length || VerificaSeProcuraInvalida || (!VerificaSeProcuraInvalida && !listaDePalavrasEncontradas.length && verificaSeHaPesquisa)" > 
+            <div class="divider"/>
+      </div>
+      -->
+      
+      <div class="divider"/>
 
           <!--
           <div v-for="palavra in listaDePalavrasEncontradas" :key="palavra.id"> 
@@ -56,15 +64,6 @@
             </div> 
           </div>
 
-          <div v-if="showLess">
-            <div v-for="palavra in listaDePalavrasEncontradas.slice(0, 15)" :key="palavra.id">{{ palavra }} <br></div>
-          </div> 
-          <div v-else> 
-            <div v-for="palavra in listaDePalavrasEncontradas" :key="palavra.id">{{ palavra }} <br></div>
-          </div> 
-          <button @click="showLess = false">More</button>
-
-
           <div v-if="listaDePalavrasEncontradas.length > 0 "> 
             <p class="text-center font-weight-normal">
 
@@ -72,38 +71,60 @@
             </p>            
           </div> 
           -->
-          <div class="container">
-            <div class="row" v-for="i in Math.ceil(listaDePalavrasEncontradas.length / 5) " :key="i.id">
-              <p  class="col " v-for="palavra in listaDePalavrasEncontradas.slice((i - 1 ) * 5, i * 5)" :key="palavra.id">
-                {{palavra}}
-              </p>           
-            </div>
-          </div>
+          
+          
+
+      <div class="m-4 word">            
+        <div v-if="VerificaSeProcuraInvalida">           
+              <h5>Sem Resultados</h5>  
+              <p class="m-4">Letra procurada não pode ser igual a letra Inexistentes.</p>  
+        </div> 
+        <div v-else-if="!VerificaSeProcuraInvalida && !listaDePalavrasEncontradas.length  && verificaSeHaPesquisa">           
+              <h5>Sem Resultados</h5>  
+              <p class="m-4">Não há resultados para esta combinação.</p>  
+        </div> 
+        <div v-else-if="listaDePalavrasEncontradas.length > 0 && listaDePalavrasEncontradas.length == 1" >
+              <h5>Palavra Encontrada</h5>
         </div>
-      </div>
+        <div v-else-if="listaDePalavrasEncontradas.length > 1" >
+              <h5>Palavras Encontradas</h5>
+        </div>
+      </div>  
+            
+      <div class="found-words-box d-flex justify-content-center overflow-auto word" > 
+        <div class="container">   
+            <div class="row justify-content-center" v-for="i in Math.ceil(listaDePalavrasEncontradas.length / 5) " :key="i.id">
+              <p  class="col mb-1" v-for="palavra in listaDePalavrasEncontradas.slice((i - 1 ) * 5, i * 5)" :key="palavra.id">
+                <span>{{palavra}}</span>
+              </p>           
+            </div>        
+        </div>
+      </div>      
 
     </div>
 </template>
 
 <script>
 export default {
-  name: 'App',
+  name: 'App', 
   data (){
     return{
       word_size: 5,
       letras_input:  [],    // array criado dinamicamente
       listaDePalavras: [],
       listaDePalavrasEncontradas: [],
+      VerificaSeProcuraInvalida: false, 
+      verificaSeHaPesquisa: false,
 
       //listaDeLetras: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],     
       //listaDeLetras: ['Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M'],    
       /*
-      listaDeLetras2: [{value:'Q', state:'none'},{value:'W', state:'none'},{value:'E', state:'none'},{value:'R', state:'none'},{value:'T', state:'none'},{value:'Y', state:'none'},{value:'U', state:'none'},{value:'I', state:'none'},{value:'O', state:'none'},{value:'P', state:'none'},
+      listaDeLetras: [{value:'Q', state:'none'},{value:'W', state:'none'},{value:'E', state:'none'},{value:'R', state:'none'},{value:'T', state:'none'},{value:'Y', state:'none'},{value:'U', state:'none'},{value:'I', state:'none'},{value:'O', state:'none'},{value:'P', state:'none'},
         {value:'A', state:'none'},{value:'S', state:'none'},{value:'D', state:'none'},{value:'F', state:'none'},{value:'G', state:'none'},{value:'H', state:'none'},{value:'J', state:'none'},{value:'K', state:'none'},{value:'L', state:'none'},
         {value:'Z', state:'none'},{value:'X', state:'none'},{value:'C', state:'none'},{value:'V', state:'none'},{value:'B', state:'none'},{value:'N', state:'none'},{value:'M', state:'none'}] ,
       */
       alfabeto: 'QWERTYUIOPASDFGHJKLZXCVBNM'.split(''),
-      listaDeLetras2: [],
+      listaDeLetras: [],
       listaDeLetrasTeclado: [],  // array 'listaDeLetras' adaptado para formato de teclado
     
       //['QWERTYUIOP','ASDFGHJKL','ZXCVBNM',].map(str => str.split(''))
@@ -129,7 +150,7 @@ export default {
     cria_lista_de_inputs(){
         var array_letras_input = []; 
         for(let i = 0; i < this.word_size; i++){
-          array_letras_input.push( {'index': i, 'value': "", 'state': "none"});          
+          array_letras_input.push( {'index': i, 'value': "", 'state': "right"});          
         }
         this.letras_input = array_letras_input;
         return array_letras_input;
@@ -139,7 +160,7 @@ export default {
       for(let i = 0; i < this.alfabeto.length; i++){
           array_letras.push( {'index': i, 'value': this.alfabeto[i], 'state': "none"});          
       }
-      this.listaDeLetras2 = array_letras;
+      this.listaDeLetras = array_letras;
       return array_letras;
     },
     cria_lista_de_letras_teclado(){
@@ -164,28 +185,42 @@ export default {
     },
     // muda estado de letra em teclado
     toggleClassKeyboardButton(index){
-
-      if(this.listaDeLetras2[index].state == "wrong"){
-        this.listaDeLetras2[index].state = "none";
-      }else if(this.listaDeLetras2[index].state == "none"){
-        this.listaDeLetras2[index].state = "wrong";
-      }else {
-        this.listaDeLetras2[index].state = "none";
-      }
+      /*
+      if(this.listaDeLetras[index].state == "wrong"){
+        this.listaDeLetras[index].state = "none";
+      }else if(this.listaDeLetras[index].state == "none"){
+        this.listaDeLetras[index].state = "wrong";
+      } */
+      this.listaDeLetras[index].state = this.listaDeLetras[index].state == "none" ? "wrong" : "none";
     },
     // muda estado de letra em input
     toggleClassInput(n){
+      /*
       if(this.letras_input[n].state == "right"){
         this.letras_input[n].state = "displaced";
       }else if(this.letras_input[n].state == "displaced"){
         this.letras_input[n].state = "right";
-      }else {
-        this.letras_input[n].state = "right";
-      }
-      //alert(n)
-      //this.letras_input[n].state = this.letras_input[n].state == "right" ? "displaced" : "right";
+      } */
+      this.letras_input[n].state = this.letras_input[n].state == "right" ? "displaced" : "right";
     },
-
+    //muda estado de letra em input via Key Arrow
+    toggleClassThroughArrowKey(event, InputIndex){
+      if(event.key == "ArrowUp" || event.key == "ArrowDown"){
+        this.toggleClassInput(InputIndex);
+        this.procurar();
+      }
+      else
+      if(event.key == "ArrowRight"){
+        event.target.nextElementSibling.focus();
+        this.procurar();
+      }
+      else
+      if(event.key == "ArrowLeft"){
+        event.target.previousElementSibling.focus();
+        this.procurar();
+      }
+    },
+    
     mudarLetra(e, n){     
       if(e.key == "Enter"){ 
         /*
@@ -204,7 +239,7 @@ export default {
         }
 
         //verifica se existe alguma letra errada a ser filtrada das palavras
-        let letrasErradas = this.listaDeLetras2.filter(function checkWrong(obj) {
+        let letrasErradas = this.listaDeLetras.filter(function checkWrong(obj) {
           return obj.state == 'wrong';
         });
         existeLetraErrada = letrasErradas.length > 0 ? true : false;    //teste
@@ -274,6 +309,7 @@ export default {
       var newArray = [];
       var existeLetraBusca = false;
       var existeLetraErrada = false;
+      this.VerificaSeProcuraInvalida = false;
 
       //verifica se existe letra a ser buscada em input
       for (var i = 0; i < this.letras_input.length; ++i) {
@@ -284,7 +320,7 @@ export default {
       }
 
       //verifica se existe alguma letra errada a ser filtrada das palavras
-      let letrasErradas = this.listaDeLetras2.filter(function checkWrong(obj) {
+      let letrasErradas = this.listaDeLetras.filter(function checkWrong(obj) {
         return obj.state == 'wrong';
       });
       existeLetraErrada = letrasErradas.length > 0 ? true : false;
@@ -321,22 +357,38 @@ export default {
 
       //exclue da lista palavras que contem alguma das letras excluidas (wrong)        
       if(existeLetraErrada){
-        letrasErradas.forEach(l => {
+        letrasErradas.forEach(letra_errada => {
           newArray = []; 
           this.listaDePalavrasEncontradas.forEach(palavra => {
-            if(!palavra.includes(l.value)){
+            if(!palavra.includes(letra_errada.value)){
               newArray.push(palavra);
             }
           });
           this.listaDePalavrasEncontradas = newArray;
         });      
-      }       
+      }
+
+      
+      this.letras_input.forEach(letra_input => {
+          letrasErradas.forEach(letra_errada => {
+            //alert(letra_input.value.toUpperCase() == letra_errada.value.toUpperCase())
+            if(letra_input.value.toUpperCase() == letra_errada.value.toUpperCase()){
+                this.VerificaSeProcuraInvalida = true;
+            }
+          });    
+      });
+
+      this.verificaSeHaPesquisa = true
+      
+      
     },
 
     resetar(){
       this.letras_input = this.cria_lista_de_inputs();
-      this.listaDeLetras2 = this.cria_lista_de_letras();
+      this.listaDeLetras = this.cria_lista_de_letras();
       this.listaDePalavrasEncontradas = [];
+      this.VerificaSeProcuraInvalida = false;
+      this.verificaSeHaPesquisa = false;
     }
   }
 }
@@ -347,6 +399,10 @@ export default {
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+}
+.app-name {
+  font-family: 'Acme', sans-serif;
+  font-size: 270%;
 }
 .letter-wrapper {
   border: 2px solid #252525;
@@ -392,4 +448,13 @@ input {
   max-width: 20%;
 }
 
+.word{
+  text-align: center;
+}
+
+.divider {
+  flex-grow: 1;
+  border-bottom: 1px solid black;
+  margin: 5px
+}
 </style>
