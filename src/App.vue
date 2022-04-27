@@ -4,7 +4,7 @@
         <!-- header -->
         <div class="position-relative mt-3 mb-4 d-flex align-items-center justify-content-around">
           <!-- app name -->
-          <h1 class="text-center mb-0 app-name"><NomeApp /></h1>
+          <h1 class="text-center mb-0 app-name"><NomeApp v-bind:app_name_prop="app_name"/></h1> 
           <!-- button show modal -->
           <button class="help-button rounded position-absolute align-items-center justify-content-center" 
             @click="showModal = true">
@@ -12,7 +12,7 @@
           </button>          
         </div> 
         
-        <!-- app body -->
+        <!-- app body --> 
         <div class="mt-2">
           <div class="mb-4">
 
@@ -124,6 +124,7 @@ export default {
   },
   data (){
     return{
+      app_name: 'Letreco Helper',  
       word_size: 5,
       letras_input:  [],    // array criado dinamicamente
       listaDePalavras: [],
@@ -148,8 +149,10 @@ export default {
        
       this.cria_lista_de_inputs(),    // cria array que gerara input para entrada de letras 
       this.cria_lista_de_letras(),    // cria array de letras com 'state' e 'index'
-      this.cria_lista_de_letras_teclado()  // cria array que gerara teclado apartir de letras
+      this.cria_lista_de_letras_teclado(),  // cria array que gerara teclado apartir de letras
+      document.title = this.app_name
   },
+  
   methods:{
     setWordList(wordList){
       this.listaDePalavras = wordList;
