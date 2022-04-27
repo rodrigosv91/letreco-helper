@@ -1,24 +1,7 @@
-# letreco-helper
+# Letreco Helper
 
-## Project setup
-```
-npm install
-```
+Assistente para jogo de palavras Letreco, Termo, Charada, Palavra e afins. 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Disponivel em: [Letreco Helper](https://rodrigosv91.github.io/letreco-helper)
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Jogo original: [Letreco](https://gabtoschi.com/letreco)
